@@ -556,38 +556,37 @@
       document
         .getElementById("add-button-btn")
         .addEventListener("click", () => {
-          const currentCount =
-            buttonContainer.querySelectorAll(".button-group").length;
+          const currentCount = buttonContainer.querySelectorAll(".button-group").length;
           const newIndex = currentCount + 1;
 
           // Add new input fields
           const newInputs = createButtonInputs(newIndex);
-          document
-            .getElementById("button-groups-container")
-            .appendChild(newInputs);
+          // Prepend the new input group to the UI container
+          buttonContainer.prepend(newInputs);
 
-          // Update template HTML with new empty button
           const parser = new DOMParser();
           const doc = parser.parseFromString(currentHTML, "text/html");
-          const lastButton = doc.querySelector(".link-button:last-child");
+          const buttonWrapperInDoc = doc.getElementById("link-button-wrapper");
 
-          if (lastButton) {
+          if (buttonWrapperInDoc) {
             const newButton = document.createElement("a");
             newButton.className = "link-button";
+            newButton.target = "_blank"; // Match attributes from updatePreview
+            newButton.rel = "noopener noreferrer"; // Match attributes from updatePreview
             newButton.href = "";
             newButton.textContent = "";
-            lastButton.parentNode.insertBefore(
-              newButton,
-              lastButton.nextSibling
-            );
+
+            // Prepend the new link element to the wrapper in the doc
+            buttonWrapperInDoc.insertBefore(newButton, buttonWrapperInDoc.firstChild);
+
             currentHTML = doc.documentElement.outerHTML;
-            updatePreview();
+          } else {
+            console.warn(
+              "Could not find #link-button-wrapper in the template when trying to add a new button to currentHTML."
+            );
           }
 
-          // Add event listeners to new inputs
-          newInputs
-            .querySelectorAll("input")
-            .forEach((input) => input.addEventListener("input", updatePreview));
+          updatePreview(); // Ensure preview is updated immediately
         });
 
       // Download button functionality
